@@ -1,4 +1,4 @@
-group 'org.dorff'
+group 'com.dorffweb'
 version '1.0-SNAPSHOT'
 
 buildscript {
@@ -6,50 +6,67 @@ buildscript {
     ext.kotlin_version = '1.0.0'
 
     repositories {
+        jcenter()
         mavenCentral()
     }
     dependencies {
+        // Kotlin support for Gradle
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "net.saliman:gradle-cobertura-plugin:2.3.0"
     }
-}
-
-// For ease of startup
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.11'
 }
 
 apply plugin: 'kotlin'
 apply plugin: 'groovy'
 apply plugin: 'application'
+apply plugin: 'cobertura'
 
+// For plugin 'application'
 //mainClassName = 'HelloKotlinWorldKt'
 mainClassName = 'HelloGroovyWorld'
 
+compileJava {
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+
 repositories {
+    jcenter()
     mavenCentral()
 }
 
+// In case we want a runnable jar
 jar {
     manifest {
         attributes 'Main-Class': mainClassName
     }
 }
 
-//println "sourceSets.test=" + sourceSets.test.unit.groovy.dump()
-
 dependencies {
+    // Kotlin library and reflection stuff
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 
-    // Interop Kotlin AND groovy
+    // Groovy classes
     compile 'org.codehaus.groovy:groovy-all:2.4.5'
 
     // Testing with Spock (Groovy)
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
 
-    // optional dependencies for using Spock
+    // Kotlin testing
+    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+
+    // optional dependencies for using Spock. Most/all of these are probably not used at this time.
     testCompile 'org.hamcrest:hamcrest-core:1.3' // only necessary if Hamcrest matchers are used
     testRuntime 'cglib:cglib-nodep:3.2.0'        // allows mocking of classes (in addition to interfaces)
     testRuntime 'org.objenesis:objenesis:2.2'    // allows mocking of classes without default constructor (together with CGLIB)
+
+    // These solved a problem with adding Cobertura, this shouldn't really be necessary?
+    testRuntime "org.slf4j:slf4j-log4j12:1.7.5"
+    testRuntime "log4j:log4j:1.2.7"
+}
+
+// For ease of startup
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.11'
 }
